@@ -212,7 +212,7 @@ export const HighwayRoadTimeline: React.FC<HighwayRoadTimelineProps> = ({
         <div
           ref={roadTrackRef}
           aria-hidden="true"
-          className="relative flex-shrink-0 w-9 sm:w-11 md:w-13 rounded-2xl bg-gradient-to-b from-[#111A2E] via-[#152238] to-[#0D1525] border-x-2 border-slate-700/80 shadow-[inset_0_0_15px_rgba(0,0,0,0.8)] overflow-visible select-none"
+          className="relative flex-shrink-0 w-10 sm:w-12 md:w-14 rounded-2xl bg-gradient-to-b from-[#111A2E] via-[#152238] to-[#0D1525] border-x-2 border-slate-700/80 shadow-[inset_0_0_15px_rgba(0,0,0,0.8)] overflow-visible select-none"
         >
           {/* Subtle asphalt road grain texture */}
           <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#94A3B8_1px,transparent_1px)] [background-size:8px_8px] pointer-events-none" />
@@ -226,10 +226,9 @@ export const HighwayRoadTimeline: React.FC<HighwayRoadTimelineProps> = ({
 
           {/* Real-time Moving Tour Mini-Bus Vehicle */}
           <div
-            className="absolute left-1/2 -translate-x-1/2 transition-all duration-100 ease-out z-30"
+            className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-100 ease-out z-30 pointer-events-none"
             style={{
               top: `${busY}px`,
-              transform: 'translate(-50%, -44px)',
             }}
           >
             <MinibusVehicle
@@ -249,31 +248,31 @@ export const HighwayRoadTimeline: React.FC<HighwayRoadTimelineProps> = ({
             >
               {/* Grand Day Highway Entrance Banner */}
               <div className="relative rounded-3xl overflow-hidden shadow-xl border border-slate-700/60 mb-8 bg-slate-900 text-white">
-                <div className="relative h-48 sm:h-64 w-full overflow-hidden">
+                <div className="relative min-h-[250px] sm:min-h-[280px] w-full p-5 sm:p-7 flex flex-col justify-between overflow-hidden">
                   <img
                     src={day.heroImage}
                     alt={day.routeSummary}
-                    className="w-full h-full object-cover filter brightness-[0.78] scale-105"
+                    className="absolute inset-0 w-full h-full object-cover filter brightness-[0.70] scale-105 pointer-events-none"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B132B] via-[#0B132B]/50 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B132B] via-[#0B132B]/65 to-slate-950/45 pointer-events-none" />
 
                   {/* Highway Milestone Badge */}
-                  <div className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-2">
+                  <div className="relative z-10 flex flex-wrap items-center gap-2 mb-4">
                     <span className="px-3.5 py-1.5 rounded-full bg-amber-400 text-slate-950 text-xs font-monument font-bold tracking-widest uppercase shadow-lg">
                       {day.dayNumberFormatted}
                     </span>
-                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/80 backdrop-blur-md border border-white/20 text-xs text-amber-300 font-semibold font-mono">
+                    <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/85 backdrop-blur-md border border-white/20 text-xs text-amber-300 font-semibold font-mono">
                       <Calendar className="w-3.5 h-3.5" />
                       {day.date}
                     </span>
                   </div>
 
                   {/* Title & Route info */}
-                  <div className="absolute bottom-5 left-5 right-5 sm:bottom-7 sm:left-7 sm:right-7">
-                    <span className="text-[10px] sm:text-xs font-mono tracking-[0.25em] text-cyan-400 uppercase font-bold block mb-1">
+                  <div className="relative z-10 space-y-1.5 pt-4">
+                    <span className="text-[10px] sm:text-xs font-mono tracking-[0.2em] text-cyan-400 uppercase font-bold block">
                       HIGHWAY STAGE · {day.theme}
                     </span>
-                    <h2 className="font-monument text-2xl sm:text-4xl font-bold tracking-tight text-white mb-2 drop-shadow-md">
+                    <h2 className="font-monument text-xl sm:text-3xl font-bold tracking-tight text-white drop-shadow-md leading-snug">
                       {day.routeSummary}
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-200 font-light max-w-2xl leading-relaxed">

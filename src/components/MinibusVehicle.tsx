@@ -24,10 +24,10 @@ export const MinibusVehicle: React.FC<MinibusVehicleProps> = ({
           initial={{ opacity: 0, scale: 0.88, y: -4 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          className="absolute -top-7 sm:-top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-950/95 text-amber-300 border border-amber-400/50 text-[9px] sm:text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full shadow-xl backdrop-blur-md flex items-center gap-1.5 z-40"
+          className="absolute -top-7 sm:-top-8 left-0 sm:left-1/2 sm:-translate-x-1/2 whitespace-nowrap bg-slate-950/95 text-amber-300 border border-amber-400/60 text-[9px] sm:text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full shadow-2xl backdrop-blur-md flex items-center gap-1.5 z-40 pointer-events-none"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
-          <span className="max-w-[130px] sm:max-w-[200px] truncate">{currentStopName}</span>
+          <span className="max-w-[150px] sm:max-w-[200px] truncate">{currentStopName}</span>
         </motion.div>
       )}
 

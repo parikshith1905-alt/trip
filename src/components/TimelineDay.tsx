@@ -20,32 +20,33 @@ export const TimelineDay: React.FC<TimelineDayProps> = ({ day, isCurrentDay }) =
       className="relative w-full max-w-5xl mx-auto px-4 sm:px-6 py-12 scroll-mt-20"
     >
       {/* Day Hero Header Card */}
-      <div className="relative rounded-3xl overflow-hidden shadow-lg border border-[#E7DEC8] mb-12 bg-white">
+      <div className="relative rounded-3xl overflow-hidden shadow-lg border border-[#E7DEC8] mb-12 bg-slate-900">
         {/* Day Banner Photo */}
-        <div className="relative h-64 sm:h-80 w-full overflow-hidden">
+        <div className="relative min-h-[250px] sm:min-h-[280px] w-full p-6 sm:p-8 flex flex-col justify-between overflow-hidden">
           <img
             src={day.heroImage}
             alt={day.routeSummary}
-            className="w-full h-full object-cover filter brightness-85"
+            className="absolute inset-0 w-full h-full object-cover filter brightness-[0.68] scale-105 pointer-events-none"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0A192F] via-[#0A192F]/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0A192F] via-[#0A192F]/60 to-slate-950/40 pointer-events-none" />
 
-          {/* Floating Day Meta */}
-          <div className="absolute bottom-6 left-6 right-6 text-white">
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
-              <span className="px-3 py-1 rounded-full bg-[#C69234] text-[#0A192F] text-xs font-bold tracking-widest uppercase font-mono">
-                {day.dayNumberFormatted}
-              </span>
-              <span className="flex items-center gap-1.5 text-xs text-[#E5B563] font-semibold bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
-                <Calendar className="w-3.5 h-3.5" />
-                {day.date}
-              </span>
-              <span className="text-xs font-mono uppercase tracking-wider text-slate-300 bg-white/10 px-2.5 py-0.5 rounded">
-                THEME: {day.theme}
-              </span>
-            </div>
+          {/* Floating Day Meta - Top */}
+          <div className="relative z-10 flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
+            <span className="px-3 py-1 rounded-full bg-[#C69234] text-[#0A192F] text-xs font-bold tracking-widest uppercase font-mono shadow-md">
+              {day.dayNumberFormatted}
+            </span>
+            <span className="flex items-center gap-1.5 text-xs text-[#E5B563] font-semibold bg-black/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/15 font-mono">
+              <Calendar className="w-3.5 h-3.5" />
+              {day.date}
+            </span>
+            <span className="text-xs font-mono uppercase tracking-wider text-slate-300 bg-white/15 backdrop-blur-md px-2.5 py-1 rounded-full">
+              THEME: {day.theme}
+            </span>
+          </div>
 
-            <h2 className="font-monument text-2xl sm:text-4xl font-bold tracking-tight text-white mb-2">
+          {/* Title & Description - Bottom */}
+          <div className="relative z-10 text-white space-y-2 pt-4">
+            <h2 className="font-monument text-xl sm:text-3xl font-bold tracking-tight text-white leading-snug drop-shadow-md">
               {day.routeSummary}
             </h2>
 
