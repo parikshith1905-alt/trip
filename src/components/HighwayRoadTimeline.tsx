@@ -44,7 +44,9 @@ export const HighwayRoadTimeline: React.FC<HighwayRoadTimelineProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const roadTrackRef = useRef<HTMLDivElement | null>(null);
   const [busY, setBusY] = useState<number>(40);
+  const [direction, setDirection] = useState<'down' | 'up'>('down');
   const [isScrolling, setIsScrolling] = useState<boolean>(false);
+  const lastScrollYRef = useRef<number>(0);
   const [activeEventId, setActiveEventId] = useState<string>(days[0]?.events[0]?.id || '');
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
@@ -142,6 +144,15 @@ export const HighwayRoadTimeline: React.FC<HighwayRoadTimelineProps> = ({
     };
 
     const handleScroll = () => {
+      const currentScrollY = window.scrollY || window.pageYOffset;
+      const delta = currentScrollY - lastScrollYRef.current;
+
+      // Sensitive threshold to quickly detect upward vs downward swipe
+      if (Math.abs(delta) > 4) {
+        setDirection(delta > 0 ? 'down' : 'up');
+        lastScrollYRef.current = currentScrollY;
+      }
+
       setIsScrolling(true);
       if (scrollTimeoutRef.current) {
         window.clearTimeout(scrollTimeoutRef.current);
@@ -170,7 +181,12 @@ export const HighwayRoadTimeline: React.FC<HighwayRoadTimelineProps> = ({
     if (el) {
       const readingLine = window.innerHeight * 0.38;
       const y = el.getBoundingClientRect().top + window.pageYOffset - readingLine + 28;
-      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      const targetY = Math.max(0, y);
+      const currentScrollY = window.scrollY || window.pageYOffset;
+      if (Math.abs(targetY - currentScrollY) > 5) {
+        setDirection(targetY > currentScrollY ? 'down' : 'up');
+      }
+      window.scrollTo({ top: targetY, behavior: 'smooth' });
       setActiveEventId(eventId);
       const found = allEvents.find((e) => e.id === eventId);
       if (found && onActiveStopChange) {
@@ -224,18 +240,25 @@ export const HighwayRoadTimeline: React.FC<HighwayRoadTimelineProps> = ({
           {/* Center Dashed Highway Line (Yellow/Amber divider) */}
           <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[2px] border-l border-dashed border-amber-400/90 shadow-[0_0_6px_rgba(251,191,36,0.3)]" />
 
-          {/* Real-time Moving Tour Mini-Bus Vehicle */}
-          <div
-            className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-100 ease-out z-30 pointer-events-none"
-            style={{
-              top: `${busY}px`,
+          {/* Real-time Moving Tour Mini-Bus Vehicle with smooth spring tracking */}
+          <motion.div
+            className="absolute left-1/2 -translate-x-1/2 top-0 z-30 pointer-events-none"
+            animate={{
+              y: busY - 44,
+            }}
+            transition={{
+              type: 'spring',
+              stiffness: 170,
+              damping: 24,
+              mass: 0.5,
             }}
           >
             <MinibusVehicle
               isMoving={isScrolling}
               currentStopName={activeEvent?.place}
+              direction={direction}
             />
-          </div>
+          </motion.div>
         </div>
 
         {/* ===================== THE TIMELINE EVENTS COLUMN ===================== */}

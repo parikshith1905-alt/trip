@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
 import { Navigation, MapPin, ArrowRight, Sparkles } from 'lucide-react';
 
@@ -7,7 +7,48 @@ interface RouteMapSectionProps {
 }
 
 export const RouteMapSection: React.FC<RouteMapSectionProps> = ({ onSelectCity }) => {
-  const [activeStop, setActiveStop] = useState<string>('bangalore');
+  const [activeStop, setActiveStop] = useState<string | null>(null);
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const firstNodeBoxRef = useRef<HTMLDivElement | null>(null);
+  const lastNodeBoxRef = useRef<HTMLDivElement | null>(null);
+
+  const [lineGeometry, setLineGeometry] = useState<{
+    top: number;
+    height: number;
+    left: number;
+  } | null>(null);
+
+  useEffect(() => {
+    const measure = () => {
+      if (!containerRef.current || !firstNodeBoxRef.current || !lastNodeBoxRef.current) return;
+      const cRect = containerRef.current.getBoundingClientRect();
+      const fRect = firstNodeBoxRef.current.getBoundingClientRect();
+      const lRect = lastNodeBoxRef.current.getBoundingClientRect();
+
+      // Start 2px underneath the bottom border of the first box
+      const top = fRect.bottom - cRect.top - 2;
+      // Terminate 2px underneath the top border of the 4th box (guaranteeing contact)
+      const bottom = lRect.top - cRect.top + 2;
+      const height = Math.max(0, bottom - top);
+      const left = fRect.left + fRect.width / 2 - cRect.left;
+
+      setLineGeometry({ top, height, left });
+    };
+
+    measure();
+
+    const ro = new ResizeObserver(measure);
+    if (containerRef.current) {
+      ro.observe(containerRef.current);
+    }
+    window.addEventListener('resize', measure);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, []);
 
   const stops = [
     {
@@ -75,18 +116,31 @@ export const RouteMapSection: React.FC<RouteMapSectionProps> = ({ onSelectCity }
 
           {/* Vertical Highway Axis with nodes */}
           <div className="relative py-6 sm:py-8 my-auto z-10">
-            {/* The vertical animated progress line */}
-            <div className="absolute left-[30px] sm:left-[42px] top-6 bottom-6 w-[3px] bg-slate-800 rounded-full">
-              <motion.div
-                initial={{ height: '0%' }}
-                whileInView={{ height: '100%' }}
-                viewport={{ once: true }}
-                transition={{ duration: 1.5, ease: 'easeInOut' }}
-                className="w-full bg-gradient-to-b from-amber-400 via-rose-400 to-cyan-400 rounded-full"
-              />
-            </div>
+            <div ref={containerRef} className="space-y-6 sm:space-y-9 relative">
+              {/* The vertical animated progress line connecting Node 1 bottom to Node 4 top */}
+              {lineGeometry ? (
+                <div
+                  style={{
+                    top: `${lineGeometry.top}px`,
+                    height: `${lineGeometry.height}px`,
+                    left: `${lineGeometry.left}px`,
+                  }}
+                  className="absolute -translate-x-1/2 w-[3px] bg-slate-800 rounded-full z-0 overflow-hidden"
+                >
+                  <motion.div
+                    initial={{ height: '0%' }}
+                    whileInView={{ height: '100%' }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1.5, ease: 'easeInOut' }}
+                    className="w-full bg-gradient-to-b from-amber-400 via-rose-400 to-cyan-400 rounded-full"
+                  />
+                </div>
+              ) : (
+                <div className="absolute left-[34px] sm:left-[44px] -translate-x-1/2 top-[50px] sm:top-[60px] bottom-[20px] w-[3px] bg-slate-800 rounded-full z-0 overflow-hidden">
+                  <div className="w-full h-full bg-gradient-to-b from-amber-400 via-rose-400 to-cyan-400 rounded-full" />
+                </div>
+              )}
 
-            <div className="space-y-6 sm:space-y-9 relative">
               {/* Point 1: Bangalore */}
               <div
                 onClick={() => {
@@ -98,10 +152,12 @@ export const RouteMapSection: React.FC<RouteMapSectionProps> = ({ onSelectCity }
                 }`}
               >
                 <div className="relative z-10 flex-shrink-0 w-12 sm:w-16 text-center">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-900 border-2 border-amber-400 flex items-center justify-center mx-auto shadow-md">
-                    <span className="w-3 h-3 rounded-full bg-amber-400 animate-ping" />
+                  <div
+                    ref={firstNodeBoxRef}
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-900 border-2 border-amber-400 flex items-center justify-center mx-auto shadow-md"
+                  >
+                    <span className="w-3 h-3 rounded-full bg-amber-400" />
                   </div>
-                  <span className="text-[9px] font-mono tracking-wider text-slate-400 mt-1 block">START</span>
                 </div>
                 <div className="flex-grow pt-0.5">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -136,7 +192,6 @@ export const RouteMapSection: React.FC<RouteMapSectionProps> = ({ onSelectCity }
                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-900 border-2 border-rose-400 flex items-center justify-center mx-auto shadow-md">
                     <span className="w-3 h-3 rounded-full bg-rose-400" />
                   </div>
-                  <span className="text-[9px] font-mono tracking-wider text-slate-400 mt-1 block">MID</span>
                 </div>
                 <div className="flex-grow pt-0.5">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -171,7 +226,6 @@ export const RouteMapSection: React.FC<RouteMapSectionProps> = ({ onSelectCity }
                   <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-900 border-2 border-cyan-400 flex items-center justify-center mx-auto shadow-md">
                     <span className="w-3 h-3 rounded-full bg-cyan-400" />
                   </div>
-                  <span className="text-[9px] font-mono tracking-wider text-slate-400 mt-1 block">CAPE</span>
                 </div>
                 <div className="flex-grow pt-0.5">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -203,10 +257,12 @@ export const RouteMapSection: React.FC<RouteMapSectionProps> = ({ onSelectCity }
                 }`}
               >
                 <div className="relative z-10 flex-shrink-0 w-12 sm:w-16 text-center">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-900 border-2 border-amber-400 flex items-center justify-center mx-auto shadow-md">
+                  <div
+                    ref={lastNodeBoxRef}
+                    className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-slate-900 border-2 border-amber-400 flex items-center justify-center mx-auto shadow-md"
+                  >
                     <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />
                   </div>
-                  <span className="text-[9px] font-mono tracking-wider text-slate-400 mt-1 block">RETURN</span>
                 </div>
                 <div className="flex-grow pt-0.5">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -234,20 +290,21 @@ export const RouteMapSection: React.FC<RouteMapSectionProps> = ({ onSelectCity }
           <div>
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-mono font-bold tracking-widest text-slate-600 bg-slate-100 px-3 py-1 rounded-full uppercase border border-slate-200">
-                Corridor Focus
+                {activeStop ? 'Corridor Focus' : 'Route Overview'}
               </span>
               <span className="text-xs text-slate-500 font-medium">17 Travellers · 5 Rooms</span>
             </div>
 
             <h3 className="font-editorial text-2xl sm:text-3xl text-slate-900 font-bold mb-1 sm:mb-2">
-              {stops.find(s => s.id === activeStop)?.name || 'Bangalore'}
+              {stops.find(s => s.id === activeStop)?.name || 'Bangalore → Kanyakumari'}
             </h3>
             <p className="text-xs font-semibold text-amber-600 uppercase tracking-wider mb-3 sm:mb-4 font-mono">
-              {stops.find(s => s.id === activeStop)?.timeSlot}
+              {stops.find(s => s.id === activeStop)?.timeSlot || 'Oct 01 – Oct 05, 2026 · 4 Days'}
             </p>
 
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6">
-              {stops.find(s => s.id === activeStop)?.desc}
+              {stops.find(s => s.id === activeStop)?.desc ||
+                'Round-trip highway corridor spanning Bangalore, Madurai, and Kanyakumari. Tap any stop along the corridor on the left to focus on that segment, or explore the full timeline below.'}
             </p>
 
             {/* Quick Specs */}
@@ -256,27 +313,31 @@ export const RouteMapSection: React.FC<RouteMapSectionProps> = ({ onSelectCity }
                 <span className="text-slate-500 flex items-center gap-1.5">
                   <Navigation className="w-3.5 h-3.5 text-amber-500" /> Segment Tag:
                 </span>
-                <span className="font-semibold text-slate-900">{stops.find(s => s.id === activeStop)?.tag}</span>
+                <span className="font-semibold text-slate-900">
+                  {stops.find(s => s.id === activeStop)?.tag || 'NH 44 Highway Passage'}
+                </span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-500 flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5 text-amber-500" /> Associated Timeline:
                 </span>
-                <span className="font-semibold text-slate-900">{stops.find(s => s.id === activeStop)?.dayLabel}</span>
+                <span className="font-semibold text-slate-900">
+                  {stops.find(s => s.id === activeStop)?.dayLabel || 'Full 4-Day Journey'}
+                </span>
               </div>
             </div>
           </div>
 
           <div className="space-y-3">
             <button
-              id={`route-jump-btn-${activeStop}`}
+              id={`route-jump-btn-${activeStop || 'overview'}`}
               onClick={() => {
                 const target = stops.find(s => s.id === activeStop)?.targetId || 'day-1';
                 onSelectCity(target);
               }}
               className="w-full py-3.5 px-4 min-h-[44px] rounded-2xl bg-slate-900 hover:bg-slate-800 active:bg-slate-950 text-white font-semibold text-xs tracking-widest uppercase flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
             >
-              <span>JUMP TO THIS DAY'S TIMELINE</span>
+              <span>{activeStop ? "JUMP TO THIS DAY'S TIMELINE" : 'EXPLORE ITINERARY TIMELINE'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

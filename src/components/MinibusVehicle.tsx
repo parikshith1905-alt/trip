@@ -4,19 +4,16 @@ import { motion } from 'motion/react';
 interface MinibusVehicleProps {
   isMoving?: boolean;
   currentStopName?: string;
+  direction?: 'down' | 'up';
 }
 
 export const MinibusVehicle: React.FC<MinibusVehicleProps> = ({
   isMoving = false,
   currentStopName,
+  direction = 'down',
 }) => {
   return (
     <div className="relative flex flex-col items-center select-none pointer-events-none z-30">
-      {/* Front Headlight beam projection onto the asphalt ahead */}
-      <div className="absolute top-[82%] left-1/2 -translate-x-1/2 w-20 sm:w-28 h-24 sm:h-32 pointer-events-none overflow-visible">
-        <div className="w-full h-full bg-[radial-gradient(ellipse_at_top,rgba(251,191,36,0.45)_0%,rgba(251,191,36,0.12)_50%,transparent_75%)] transform origin-top" />
-      </div>
-
       {/* Floating dynamic destination tag pinned right above the mini-bus */}
       {currentStopName && (
         <motion.div
@@ -31,16 +28,34 @@ export const MinibusVehicle: React.FC<MinibusVehicleProps> = ({
         </motion.div>
       )}
 
-      {/* Mini-bus Coach SVG (Top-down 2.5D perspective) */}
+      {/* Rotating Vehicle Assembly (Body + Headlights turn 180deg when moving upward) */}
       <motion.div
-        animate={
-          isMoving
-            ? { y: [0, -1.2, 0], scale: [1, 1.008, 1] }
-            : { y: 0, scale: 1 }
-        }
-        transition={{ duration: 0.35, repeat: isMoving ? Infinity : 0, ease: 'easeInOut' }}
-        className="relative filter drop-shadow-[0_6px_14px_rgba(0,0,0,0.65)]"
+        animate={{
+          rotate: direction === 'up' ? 180 : 0,
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 220,
+          damping: 22,
+          mass: 0.6,
+        }}
+        className="relative flex flex-col items-center justify-center origin-center"
       >
+        {/* Front Headlight beam projection onto the asphalt ahead */}
+        <div className="absolute top-[82%] left-1/2 -translate-x-1/2 w-20 sm:w-28 h-24 sm:h-32 pointer-events-none overflow-visible">
+          <div className="w-full h-full bg-[radial-gradient(ellipse_at_top,rgba(251,191,36,0.45)_0%,rgba(251,191,36,0.12)_50%,transparent_75%)] transform origin-top" />
+        </div>
+
+        {/* Mini-bus Coach SVG (Top-down 2.5D perspective) */}
+        <motion.div
+          animate={
+            isMoving
+              ? { y: [0, -1.2, 0], scale: [1, 1.008, 1] }
+              : { y: 0, scale: 1 }
+          }
+          transition={{ duration: 0.35, repeat: isMoving ? Infinity : 0, ease: 'easeInOut' }}
+          className="relative filter drop-shadow-[0_6px_14px_rgba(0,0,0,0.65)]"
+        >
         <svg
           width="40"
           height="92"
@@ -182,6 +197,7 @@ export const MinibusVehicle: React.FC<MinibusVehicleProps> = ({
           </defs>
         </svg>
       </motion.div>
-    </div>
-  );
+    </motion.div>
+  </div>
+);
 };
