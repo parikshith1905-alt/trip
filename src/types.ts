@@ -19,7 +19,9 @@ export interface TimelineEvent {
   plannedDishes?: string[]; // e.g. for The Curry or Sea View
   shoppingCategories?: string[]; // for Sannathi Street
   photoUrl?: string;
+  secondaryPhotoUrl?: string;
   photoCaption?: string;
+  tagLabel?: string;
   roadTripData?: {
     from: string;
     to: string;

@@ -1,27 +1,48 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Clock, MapPin, Navigation, AlertCircle, ArrowRight } from 'lucide-react';
+import { Clock, MapPin, Navigation, AlertCircle, ArrowRight, Sparkles } from 'lucide-react';
 import { TimelineEvent } from '../types';
+import { DynamicCardImage } from './DynamicCardImage';
 
 interface RoadTripSegmentProps {
   event: TimelineEvent;
   isActive?: boolean;
+  onOpenLightbox?: (url: string, caption?: string) => void;
 }
 
-export const RoadTripSegment: React.FC<RoadTripSegmentProps> = ({ event }) => {
+export const RoadTripSegment: React.FC<RoadTripSegmentProps> = ({ event, isActive = false, onOpenLightbox }) => {
   const data = event.roadTripData;
 
   return (
-    <div className="relative my-6 w-full">
-      <div className="bg-[#0B132B] text-white rounded-3xl p-5 sm:p-7 border border-slate-800 shadow-xl relative overflow-hidden">
+    <div
+      id={`event-card-${event.id}`}
+      className={`relative my-4 sm:my-6 w-full transition-all duration-300 ${
+        isActive ? 'scale-[1.01] z-10' : 'scale-[0.99] opacity-90'
+      }`}
+    >
+      <div
+        className={`bg-[#0B132B] text-white rounded-3xl p-5 sm:p-7 relative overflow-hidden transition-all duration-300 border ${
+          isActive
+            ? 'border-amber-400 shadow-[0_12px_40px_rgba(245,158,11,0.25)] ring-2 ring-amber-400/40'
+            : 'border-slate-800 shadow-xl'
+        }`}
+      >
         {/* Subtle highway line effect */}
         <div className="absolute top-0 bottom-0 left-0 right-0 opacity-10 pointer-events-none bg-[radial-gradient(#38BDF8_1px,transparent_1px)] [background-size:16px_16px]" />
 
         {/* Badge & Timing Header */}
         <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-white/10 mb-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs font-bold uppercase tracking-wider font-mono">
-            <Navigation className="w-3.5 h-3.5 text-amber-400" />
-            <span>{data?.badge || 'HIGHWAY TRANSIT'}</span>
+          <div className="flex items-center gap-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs font-bold uppercase tracking-wider font-mono">
+              <Navigation className="w-3.5 h-3.5 text-amber-400" />
+              <span>{data?.badge || 'HIGHWAY TRANSIT'}</span>
+            </div>
+            {isActive && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold font-mono tracking-wider text-slate-950 bg-amber-400 px-2.5 py-0.5 rounded-full uppercase animate-pulse">
+                <Sparkles className="w-2.5 h-2.5 fill-current" />
+                <span>BUS ON HIGHWAY</span>
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2 text-xs font-mono text-slate-300">
@@ -29,6 +50,20 @@ export const RoadTripSegment: React.FC<RoadTripSegmentProps> = ({ event }) => {
             <span>Duration: {data?.duration || event.duration}</span>
           </div>
         </div>
+
+        {/* Dynamic Image if available */}
+        {event.photoUrl && (
+          <div className="mb-4">
+            <DynamicCardImage
+              photoUrl={event.photoUrl}
+              secondaryPhotoUrl={event.secondaryPhotoUrl}
+              caption={event.photoCaption || 'NH 44 Highway Road Trip Segment'}
+              placeName={event.place}
+              isActive={isActive}
+              onOpenLightbox={onOpenLightbox}
+            />
+          </div>
+        )}
 
         {/* Origin & Destination */}
         <div className="py-3 sm:py-4">
@@ -119,3 +154,4 @@ export const RoadTripSegment: React.FC<RoadTripSegmentProps> = ({ event }) => {
     </div>
   );
 };
+

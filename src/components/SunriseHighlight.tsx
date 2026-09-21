@@ -1,28 +1,52 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Sun, MapPin, ExternalLink, Clock, Sparkles } from 'lucide-react';
+import { Sun, MapPin, ExternalLink, Clock, Sparkles, Maximize2 } from 'lucide-react';
 import { TimelineEvent } from '../types';
 
 interface SunriseHighlightProps {
   event: TimelineEvent;
   isActive?: boolean;
+  onOpenLightbox?: (url: string, caption?: string) => void;
 }
 
-export const SunriseHighlight: React.FC<SunriseHighlightProps> = ({ event, isActive }) => {
+export const SunriseHighlight: React.FC<SunriseHighlightProps> = ({
+  event,
+  isActive = false,
+  onOpenLightbox,
+}) => {
+  const sunrisePhoto = event.photoUrl || 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80';
+
   return (
-    <div className="relative my-8 w-full">
-      <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-[#F39C12]/30 text-white">
-        {/* Background Image with warm dawn radiance */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1600&q=80"
+    <div
+      id={`event-card-${event.id}`}
+      className={`relative my-6 sm:my-8 w-full transition-all duration-300 ${
+        isActive ? 'scale-[1.01] z-10' : 'scale-[0.99] opacity-90'
+      }`}
+    >
+      <div
+        className={`relative rounded-3xl overflow-hidden shadow-2xl text-white transition-all duration-300 border ${
+          isActive
+            ? 'border-amber-400 shadow-[0_16px_50px_rgba(245,158,11,0.3)] ring-2 ring-amber-400/40'
+            : 'border-[#F39C12]/30'
+        }`}
+      >
+        {/* Background Image with dynamic zoom and warm dawn radiance */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <motion.img
+            src={sunrisePhoto}
             alt="Dawn at Triveni Sangam"
+            animate={
+              isActive
+                ? { scale: [1.02, 1.08, 1.03] }
+                : { scale: 1 }
+            }
+            transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
             className="w-full h-full object-cover object-center filter brightness-90"
           />
           {/* Animated golden dawn glow overlay */}
           <motion.div
-            animate={{ opacity: [0.65, 0.85, 0.65] }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+            animate={{ opacity: isActive ? [0.75, 0.95, 0.75] : [0.65, 0.85, 0.65] }}
+            transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
             className="absolute inset-0 bg-gradient-to-tr from-[#1B0B2B]/95 via-[#78281F]/70 to-[#C69234]/40 mix-blend-multiply"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0A192F] via-transparent to-black/30" />
@@ -32,13 +56,32 @@ export const SunriseHighlight: React.FC<SunriseHighlightProps> = ({ event, isAct
         <div className="relative z-10 p-6 sm:p-10 flex flex-col justify-between min-h-[340px]">
           {/* Top Pill */}
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[#FFE082] text-xs font-bold uppercase tracking-widest">
-              <Sun className="w-4 h-4 text-[#FFA726] animate-spin-slow" />
-              <span>CINEMATIC MOMENT · TRIVENI SANGAM</span>
+            <div className="flex items-center gap-2">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[#FFE082] text-xs font-bold uppercase tracking-widest">
+                <Sun className="w-4 h-4 text-[#FFA726] animate-spin-slow" />
+                <span>CINEMATIC MOMENT · TRIVENI SANGAM</span>
+              </div>
+              {isActive && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold font-mono text-slate-950 bg-amber-400 px-2.5 py-0.5 rounded-full uppercase animate-pulse">
+                  <Sparkles className="w-2.5 h-2.5 fill-current" />
+                  <span>BUS AT SEAFRONT</span>
+                </span>
+              )}
             </div>
 
-            <div className="text-xs font-mono text-[#FFE082] bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
-              5:40 AM – 6:40 AM
+            <div className="flex items-center gap-2">
+              <div className="text-xs font-mono text-[#FFE082] bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
+                5:40 AM – 6:40 AM
+              </div>
+              {onOpenLightbox && (
+                <button
+                  onClick={() => onOpenLightbox(sunrisePhoto, 'Golden morning sunrise over the confluence of three oceans at Triveni Sangam')}
+                  className="p-1.5 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-sm border border-white/20 text-white transition-colors"
+                  title="Expand Photo"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
           </div>
 
@@ -94,3 +137,4 @@ export const SunriseHighlight: React.FC<SunriseHighlightProps> = ({ event, isAct
     </div>
   );
 };
+

@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Ship, MapPin, ExternalLink, Compass, Clock, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Ship, MapPin, ExternalLink, Compass, Clock, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import { TimelineEvent } from '../types';
+import { DynamicCardImage } from './DynamicCardImage';
 
 interface IslandExperienceProps {
   event: TimelineEvent;
   isActive?: boolean;
+  onOpenLightbox?: (url: string, caption?: string) => void;
 }
 
-export const IslandExperience: React.FC<IslandExperienceProps> = ({ event, isActive }) => {
+export const IslandExperience: React.FC<IslandExperienceProps> = ({ event, isActive = false, onOpenLightbox }) => {
   const [selectedSubStop, setSelectedSubStop] = useState<string>('vivekananda');
 
   const islandStops = [
@@ -26,7 +28,8 @@ export const IslandExperience: React.FC<IslandExperienceProps> = ({ event, isAct
       type: 'island-point',
       tag: 'Sacred Island Sanctuary',
       desc: 'Historic rock memorial built in 1970 where Swami Vivekananda attained enlightenment in 1892, perched amid waves.',
-      photo: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80',
+      photo: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1200&q=80',
+      secondaryPhoto: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1200&q=80',
     },
     {
       id: 'thiruvalluvar',
@@ -35,7 +38,8 @@ export const IslandExperience: React.FC<IslandExperienceProps> = ({ event, isAct
       type: 'island-point',
       tag: '133-ft Stone Monument',
       desc: 'Colossal 133-foot stone sculpture of the venerable Tamil poet-philosopher, standing steadfast on an adjacent sea islet.',
-      photo: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=80',
+      photo: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1200&q=80',
+      secondaryPhoto: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1200&q=80',
     },
     {
       id: 'glass-bridge',
@@ -44,7 +48,8 @@ export const IslandExperience: React.FC<IslandExperienceProps> = ({ event, isAct
       type: 'island-point',
       tag: 'Sea View Walkway',
       desc: 'Modern transparent glass walkway connecting visitors directly above the ocean waves crashing between the rocky formations.',
-      photo: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+      photo: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+      secondaryPhoto: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1200&q=80',
     },
     {
       id: 'mainland-return',
@@ -56,8 +61,19 @@ export const IslandExperience: React.FC<IslandExperienceProps> = ({ event, isAct
   ];
 
   return (
-    <div className="relative my-8 w-full">
-      <div className="bg-gradient-to-br from-[#0F2844] via-[#143254] to-[#0A1E35] text-white rounded-3xl p-6 sm:p-9 border border-[#234A73] shadow-xl overflow-hidden relative">
+    <div
+      id={`event-card-${event.id}`}
+      className={`relative my-6 sm:my-8 w-full transition-all duration-300 ${
+        isActive ? 'scale-[1.01] z-10' : 'scale-[0.99] opacity-90'
+      }`}
+    >
+      <div
+        className={`bg-gradient-to-br from-[#0F2844] via-[#143254] to-[#0A1E35] text-white rounded-3xl p-6 sm:p-9 shadow-xl overflow-hidden relative transition-all duration-300 border ${
+          isActive
+            ? 'border-amber-400 shadow-[0_12px_40px_rgba(245,158,11,0.25)] ring-2 ring-amber-400/40'
+            : 'border-[#234A73]'
+        }`}
+      >
         {/* Subtle sea wave background overlay */}
         <div className="absolute inset-0 opacity-15 pointer-events-none bg-[radial-gradient(#38B2AC_1px,transparent_1px)] [background-size:24px_24px]" />
 
@@ -68,9 +84,17 @@ export const IslandExperience: React.FC<IslandExperienceProps> = ({ event, isAct
               <Ship className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] uppercase font-mono tracking-[0.2em] text-[#4FD1C5] font-bold block">
-                SPECIAL SECTION · 12:20–2:30 PM
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase font-mono tracking-[0.2em] text-[#4FD1C5] font-bold block">
+                  SPECIAL SECTION · 12:20–2:30 PM
+                </span>
+                {isActive && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold font-mono text-slate-950 bg-amber-400 px-2.5 py-0.5 rounded-full uppercase animate-pulse">
+                    <Sparkles className="w-2.5 h-2.5 fill-current" />
+                    <span>BUS AT JETTY</span>
+                  </span>
+                )}
+              </div>
               <h3 className="font-monument text-xl sm:text-2xl font-bold text-white tracking-wide">
                 THE ISLAND EXPERIENCE
               </h3>
@@ -166,16 +190,15 @@ export const IslandExperience: React.FC<IslandExperienceProps> = ({ event, isAct
           return (
             <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 mt-6 pt-4 items-center">
               {currentStop.photo && (
-                <div className="md:col-span-5 relative h-52 rounded-2xl overflow-hidden border border-white/15 shadow-md">
-                  <img
-                    src={currentStop.photo}
-                    alt={currentStop.name}
-                    className="w-full h-full object-cover"
+                <div className="md:col-span-5">
+                  <DynamicCardImage
+                    photoUrl={currentStop.photo}
+                    secondaryPhotoUrl={currentStop.secondaryPhoto}
+                    caption={`${currentStop.name} — ${currentStop.tag}`}
+                    placeName={currentStop.name}
+                    isActive={isActive}
+                    onOpenLightbox={onOpenLightbox}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                  <span className="absolute bottom-3 left-3 text-[11px] font-mono text-[#E5B563] bg-black/50 px-2 py-1 rounded">
-                    {currentStop.tag}
-                  </span>
                 </div>
               )}
 

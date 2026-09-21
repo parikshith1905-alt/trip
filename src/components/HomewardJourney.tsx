@@ -1,17 +1,30 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Clock, Navigation, AlertCircle, ArrowRight } from 'lucide-react';
+import { Clock, Navigation, AlertCircle, ArrowRight, Sparkles } from 'lucide-react';
 import { TimelineEvent } from '../types';
+import { DynamicCardImage } from './DynamicCardImage';
 
 interface HomewardJourneyProps {
   event: TimelineEvent;
   isActive?: boolean;
+  onOpenLightbox?: (url: string, caption?: string) => void;
 }
 
-export const HomewardJourney: React.FC<HomewardJourneyProps> = ({ event }) => {
+export const HomewardJourney: React.FC<HomewardJourneyProps> = ({ event, isActive = false, onOpenLightbox }) => {
   return (
-    <div className="relative my-8 sm:my-10 w-full">
-      <div className="bg-[#0B132B] text-white rounded-3xl p-5 sm:p-9 border border-amber-400/40 shadow-2xl relative overflow-hidden">
+    <div
+      id={`event-card-${event.id}`}
+      className={`relative my-6 sm:my-10 w-full transition-all duration-300 ${
+        isActive ? 'scale-[1.01] z-10' : 'scale-[0.99] opacity-90'
+      }`}
+    >
+      <div
+        className={`bg-[#0B132B] text-white rounded-3xl p-5 sm:p-9 relative overflow-hidden transition-all duration-300 border ${
+          isActive
+            ? 'border-amber-400 shadow-[0_16px_50px_rgba(245,158,11,0.3)] ring-2 ring-amber-400/40'
+            : 'border-amber-400/40 shadow-2xl'
+        }`}
+      >
         {/* Animated ambient light */}
         <div className="absolute top-0 right-0 w-80 sm:w-96 h-80 sm:h-96 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-80 sm:w-96 h-80 sm:h-96 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -23,9 +36,17 @@ export const HomewardJourney: React.FC<HomewardJourneyProps> = ({ event }) => {
               <Navigation className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <span className="text-[10px] font-mono tracking-[0.25em] text-amber-400 font-bold block uppercase">
-                2:00 PM DEPARTURE · OCT 04
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono tracking-[0.25em] text-amber-400 font-bold block uppercase">
+                  2:00 PM DEPARTURE · OCT 04
+                </span>
+                {isActive && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold font-mono text-slate-950 bg-amber-400 px-2.5 py-0.5 rounded-full uppercase animate-pulse">
+                    <Sparkles className="w-2.5 h-2.5 fill-current" />
+                    <span>BUS HEADING HOME</span>
+                  </span>
+                )}
+              </div>
               <h3 className="font-monument text-xl sm:text-3xl font-bold text-white tracking-tight">
                 HOMEWARD JOURNEY
               </h3>
@@ -37,6 +58,20 @@ export const HomewardJourney: React.FC<HomewardJourneyProps> = ({ event }) => {
             <span>~12–13 Hours With Meal & Fuel Stops</span>
           </div>
         </div>
+
+        {/* Dynamic Road Trip Image */}
+        {event.photoUrl && (
+          <div className="relative z-10 my-5">
+            <DynamicCardImage
+              photoUrl={event.photoUrl}
+              secondaryPhotoUrl={event.secondaryPhotoUrl}
+              caption={event.photoCaption || 'Homeward journey northward along NH 44 corridor toward Bangalore'}
+              placeName={event.place}
+              isActive={isActive}
+              onOpenLightbox={onOpenLightbox}
+            />
+          </div>
+        )}
 
         {/* Route Visualization */}
         <div className="relative z-10 py-6 sm:py-8">

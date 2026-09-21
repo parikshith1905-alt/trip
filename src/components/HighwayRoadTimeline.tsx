@@ -19,6 +19,7 @@ import {
   Ship,
   Footprints,
   Bed,
+  Camera,
 } from 'lucide-react';
 import { ItineraryDay, TimelineEvent } from '../types';
 import { MinibusVehicle } from './MinibusVehicle';
@@ -26,6 +27,8 @@ import { RoadTripSegment } from './RoadTripSegment';
 import { IslandExperience } from './IslandExperience';
 import { SunriseHighlight } from './SunriseHighlight';
 import { HomewardJourney } from './HomewardJourney';
+import { DynamicCardImage } from './DynamicCardImage';
+import { PhotoLightbox } from './PhotoLightbox';
 
 interface HighwayRoadTimelineProps {
   days: ItineraryDay[];
@@ -49,6 +52,17 @@ export const HighwayRoadTimeline: React.FC<HighwayRoadTimelineProps> = ({
     return initial;
   });
 
+  // Photo Lightbox modal state
+  const [lightboxState, setLightboxState] = useState<{
+    isOpen: boolean;
+    photoUrl: string | null;
+    caption?: string | null;
+  }>({
+    isOpen: false,
+    photoUrl: null,
+    caption: null,
+  });
+
   const scrollTimeoutRef = useRef<number | null>(null);
 
   // Flatten all events with their day metadata for easy reference
@@ -69,6 +83,14 @@ export const HighwayRoadTimeline: React.FC<HighwayRoadTimelineProps> = ({
 
   const toggleCard = (id: string) => {
     setExpandedCards((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const handleOpenLightbox = (url: string, caption?: string) => {
+    setLightboxState({
+      isOpen: true,
+      photoUrl: url,
+      caption: caption || null,
+    });
   };
 
   // Scroll listener to update minibus position and track the active destination
@@ -301,23 +323,44 @@ export const HighwayRoadTimeline: React.FC<HighwayRoadTimelineProps> = ({
                       {/* Event Container */}
                       <div className="w-full">
                         {isSpecialRoadTrip ? (
-                          <RoadTripSegment event={event} isActive={isActive} />
+                          <RoadTripSegment
+                            event={event}
+                            isActive={isActive}
+                            onOpenLightbox={handleOpenLightbox}
+                          />
                         ) : isIsland ? (
-                          <IslandExperience event={event} isActive={isActive} />
+                          <IslandExperience
+                            event={event}
+                            isActive={isActive}
+                            onOpenLightbox={handleOpenLightbox}
+                          />
                         ) : isSunrise ? (
-                          <SunriseHighlight event={event} isActive={isActive} />
+                          <SunriseHighlight
+                            event={event}
+                            isActive={isActive}
+                            onOpenLightbox={handleOpenLightbox}
+                          />
                         ) : isHomeward ? (
-                          <HomewardJourney event={event} isActive={isActive} />
+                          <HomewardJourney
+                            event={event}
+                            isActive={isActive}
+                            onOpenLightbox={handleOpenLightbox}
+                          />
                         ) : (
-                          /* Modern Aesthetic Event Card */
+                          /* Modern Aesthetic Dynamic Event Card */
                           <div
                             id={`event-card-${event.id}`}
-                            className={`w-full rounded-2xl sm:rounded-3xl transition-all duration-300 border ${
+                            className={`w-full rounded-2xl sm:rounded-3xl transition-all duration-300 border overflow-hidden ${
                               isActive
-                                ? 'bg-white border-amber-400/90 shadow-[0_8px_30px_rgba(245,158,11,0.18)] ring-2 ring-amber-400/30'
-                                : 'bg-white hover:bg-slate-50/90 border-slate-200/90 hover:border-slate-300 shadow-sm'
+                                ? 'bg-white border-amber-400 shadow-[0_16px_40px_rgba(245,158,11,0.22)] ring-2 ring-amber-400/40 scale-[1.012] z-10'
+                                : 'bg-white hover:bg-slate-50/90 border-slate-200/90 hover:border-slate-300 shadow-sm scale-[0.988] opacity-85 hover:opacity-100'
                             }`}
                           >
+                            {/* Dynamic Active Progress Top Rail */}
+                            {isActive && (
+                              <div className="h-1.5 w-full bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 shadow-[0_0_12px_rgba(251,191,36,0.6)]" />
+                            )}
+
                             {/* Card Header (clickable to collapse/expand) */}
                             <div
                               onClick={() => toggleCard(event.id)}
@@ -340,13 +383,14 @@ export const HighwayRoadTimeline: React.FC<HighwayRoadTimelineProps> = ({
                                 {/* Active Tag / Card Toggle */}
                                 <div className="flex items-center gap-2">
                                   {isActive && (
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-wider text-amber-700 bg-amber-100/90 px-2.5 py-0.5 rounded-full uppercase animate-pulse">
-                                      <span>BUS HERE</span>
+                                    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold font-mono tracking-wider text-slate-950 bg-amber-400 px-3 py-1 rounded-full uppercase shadow-sm animate-pulse">
+                                      <Sparkles className="w-2.5 h-2.5 fill-current" />
+                                      <span>BUS ARRIVED</span>
                                     </span>
                                   )}
                                   <button
                                     id={`toggle-btn-${event.id}`}
-                                    className="p-1 rounded-full text-slate-400 hover:text-slate-700 transition-colors"
+                                    className="p-1 rounded-full text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
                                     aria-label="Toggle details"
                                   >
                                     {isExpanded ? (
@@ -379,20 +423,16 @@ export const HighwayRoadTimeline: React.FC<HighwayRoadTimelineProps> = ({
                                   transition={{ duration: 0.25 }}
                                   className="px-4 pb-5 sm:px-6 sm:pb-6 space-y-4 border-t border-slate-100 pt-4"
                                 >
-                                  {/* Optional Location Photo */}
+                                  {/* Dynamic Location Photo with Ken Burns, multi-angle and fullscreen zoom */}
                                   {event.photoUrl && (
-                                    <div className="relative rounded-2xl overflow-hidden h-44 sm:h-56 w-full shadow-inner">
-                                      <img
-                                        src={event.photoUrl}
-                                        alt={event.place}
-                                        className="w-full h-full object-cover"
-                                      />
-                                      {event.photoCaption && (
-                                        <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-3 text-[11px] text-white/90">
-                                          {event.photoCaption}
-                                        </div>
-                                      )}
-                                    </div>
+                                    <DynamicCardImage
+                                      photoUrl={event.photoUrl}
+                                      secondaryPhotoUrl={event.secondaryPhotoUrl}
+                                      caption={event.photoCaption || event.place}
+                                      placeName={event.place}
+                                      isActive={isActive}
+                                      onOpenLightbox={handleOpenLightbox}
+                                    />
                                   )}
 
                                   {/* Group coordination notes */}
@@ -511,6 +551,14 @@ export const HighwayRoadTimeline: React.FC<HighwayRoadTimelineProps> = ({
           ))}
         </div>
       </div>
+
+      {/* Fullscreen High-Resolution Photo Lightbox */}
+      <PhotoLightbox
+        isOpen={lightboxState.isOpen}
+        photoUrl={lightboxState.photoUrl}
+        caption={lightboxState.caption}
+        onClose={() => setLightboxState({ isOpen: false, photoUrl: null, caption: null })}
+      />
     </div>
   );
 };
