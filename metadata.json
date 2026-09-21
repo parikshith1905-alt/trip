@@ -1,0 +1,6 @@
+{
+  "name": "Family Trip 2026",
+  "description": "Interactive travel itinerary for family trip: Bangalore → Madurai → Kanyakumari → Bangalore (Oct 1–5, 2026).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
